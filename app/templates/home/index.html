@@ -1,0 +1,106 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible">
+    <title>Flask app</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="js/script.js" charset="utf-8"></script>
+</head>
+<header>
+    <nav class="navbar">
+        Braço Robótico
+    </nav>
+</header>
+<body>
+    <div class="content">
+        <!-- <div class="values">
+            <div>
+                valor de x: <div id="motion-value-x"></div>
+            </div>
+            <br>
+            <div>
+                valor de y: <div id="motion-value-y"></div>
+            </div>
+            <br>
+            <div>
+                valor de z: <div id="motion-value-z"></div>
+            </div>
+        </div> -->    
+        <div class="slider-box">
+            <h4 width="100%">
+                Frente: 
+                <output id="out-slider">20</output>
+            </h4>
+            <br>
+            <input type="range" class="slider" id="slider-frente" min="10" max="55" step="5">
+        </div>
+        <br>
+        <div class="btn-group">
+            <h4 width="100%">Garra</h4>
+            <button class="btn abrir" id='botao-garra'>
+                Abrir
+            </button>
+        </div>
+    </div>
+</body>
+
+<script type="text/javascript" src="js/socket.io.min.js"></script>
+<script>
+
+    var socket = io.connect('http://' + document.domain + ':' + location.port);
+    socket.emit("change-garra-value", 20);
+    function map_val( x,  in_min,  in_max,  out_min,  out_max){
+        return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+    }
+
+    function motion_handler(event){   
+        old_val_x = event.accelerationIncludingGravity.x;
+        new_val_x = map_val(old_val_x, -10, 10, 0, 100);
+        //document.getElementById('motion-value-x').innerHTML = new_val_x.toFixed(3);
+        socket.emit('change-base-value-x', new_val_x);
+
+        old_val_y = event.accelerationIncludingGravity.y;
+        new_val_y = map_val(old_val_y, -10, 10, 0, 160);
+        //document.getElementById('motion-value-y').innerHTML = new_val_y.toFixed(3);
+        socket.emit('change-base-value-y', new_val_y);
+
+    }
+
+    if(window.DeviceMotionEvent){
+        window.addEventListener("devicemotion", motion_handler, false);
+    }else{
+        console.log("DeviceMotionEvent is not supported");
+    }
+     
+    var frente = document.getElementById('slider-frente');
+    var out = document.getElementById('out-slider');
+    
+    frente.addEventListener('input', function(){
+        angle = parseFloat(this.value);
+        out.value = angle;
+        socket.emit("change-frente-value", angle.toFixed(3));
+    });
+
+    var botaoGarra = document.getElementById('botao-garra');
+    var garraAberta = false;
+
+    botaoGarra.onclick = function(){
+        if (!garraAberta){
+            garraAberta = true;
+            botaoGarra.innerHTML = "Fechar"
+            botaoGarra.style.backgroundColor = "#dc3545"
+            socket.emit("change-garra-value", 90);
+        } else {
+            garraAberta = false;
+            botaoGarra.innerHTML = "Abrir"
+            botaoGarra.style.backgroundColor = "#28a745";
+            socket.emit("change-garra-value", 20);
+        }
+    }
+
+
+</script>
+</html>
