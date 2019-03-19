@@ -58,12 +58,12 @@
 
     function motion_handler(event){   
         old_val_x = event.accelerationIncludingGravity.x;
-        new_val_x = map_val(old_val_x, -10, 10, 0, 100);
+        new_val_x = map_val(old_val_x, -10, 10, 0, 140);
         //document.getElementById('motion-value-x').innerHTML = new_val_x.toFixed(3);
         socket.emit('change-base-value-x', new_val_x);
 
         old_val_y = event.accelerationIncludingGravity.y;
-        new_val_y = map_val(old_val_y, -10, 10, 0, 160);
+        new_val_y = map_val(old_val_y, -10, 10, 0, 100);
         //document.getElementById('motion-value-y').innerHTML = new_val_y.toFixed(3);
         socket.emit('change-base-value-y', new_val_y);
 
